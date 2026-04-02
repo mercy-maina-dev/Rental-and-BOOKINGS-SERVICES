@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+{% block title %}My Bookings — RentEase{% endblock %}
+
+{% block content %}
+
+<!-- Page header -->
+<div class="page-header px-4 mb-4">
+  <h3 class="fw-bold mb-1">
+    <i class="fa-solid fa-calendar-check me-2" style="color:#f59e0b"></i>
+    My Bookings
+  </h3>
+  <p class="mb-0 opacity-75">Track all your rental booking requests</p>
+</div>
+
+<!-- Status filter tabs -->
+<div class="card p-3 mb-4">
+  <div class="d-flex flex-wrap gap-2">
+    {% for key, label, color in status_tabs %}{% endfor %}
+    <a href="?status=all"
+       class="btn btn-sm fw-semibold
+              {% if status_filter == 'all' %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+      <i class="fa-solid fa-list me-1"></i>All
+      <span class="badge bg-white text-dark ms-1">{{ counts.all }}</span>
+    </a>
+    <a href="?status=pending"
+       class="btn btn-sm fw-semibold
+              {% if status_filter == 'pending' %}btn-warning text-dark{% else %}btn-outline-warning{% endif %}">
+      <i class="fa-solid fa-clock me-1"></i>Pending
+      <span class="badge bg-white text-dark ms-1">{{ counts.pending }}</span>
+    </a>
+    <a href="?status=approved"
+       class="btn btn-sm fw-semibold
+              {% if status_filter == 'approved' %}btn-success{% else %}btn-outline-success{% endif %}">
+      <i class="fa-solid fa-circle-check me-1"></i>Approved
+      <span class="badge bg-white text-dark ms-1">{{ counts.approved }}</span>
+    </a>
+    <a href="?status=rejected"
+       class="btn btn-sm fw-semibold
+              {% if status_filter == 'rejected' %}btn-danger{% else %}btn-outline-danger{% endif %}">
+      <i class="fa-solid fa-circle-xmark me-1"></i>Rejected
+      <span class="badge bg-white text-dark ms-1">{{ counts.rejected }}</span>
+    </a>
+    <a href="?status=cancelled"
+       class="btn btn-sm fw-semibold
+              {% if status_filter == 'cancelled' %}btn-secondary{% else %}btn-outline-secondary{% endif %}">
+      <i class="fa-solid fa-ban me-1"></i>Cancelled
+      <span class="badge bg-white text-dark ms-1">{{ counts.cancelled }}</span>
+    </a>
+  </div>
+</div>
+
+<!-- Bookings list -->
+{% if bookings %}
+  <div class="row g-3">
+    {% for booking in bookings %}
+    <div class="col-12">
+      <div class="card overflow-hidden"
+           style="border-left: 4px solid
+             {% if booking.status == 'approved' %}#10b981
+             {% elif booking.status == 'pending' %}#f59e0b
+             {% elif booking.status == 'rejected' %}#ef4444
+             {% else %}#6b7280{% endif %};">
+
+        <div class="card-body p-3 p-md-4">
+          <div class="row align-items-center g-3">
+
+            <!-- House image -->
+            <div class="col-auto d-none d-md-block">
+              {% if booking.house.image %}
+                <img src="{{ booking.house.image.url }}"
+                     class="rounded-3" style="width:90px;height:70px;object-fit:cover;"
+                     alt="{{ booking.house.title }}">
+              {% else %}
+                <div class="rounded-3 d-flex align-items-center justify-content-center"
+                     style="width:90px;height:70px;background:#e0e7ff;">
+                  <i class="fa-solid fa-house text-primary fa-xl"></i>
+                </div>
+              {% endif %}
+            </div>
+
+            <!-- Info -->
+            <div class="col">
+              <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                <div>
+                  <h6 class="fw-bold mb-1">{{ booking.house.title }}</h6>
+                  <p class="text-muted small mb-1">
+                    <i class="fa-solid fa-location-dot text-danger me-1"></i>
+                    {{ booking.house.location }}
+                  </p>
+                  <div class="d-flex flex-wrap gap-3 text-muted small">
+                    <span>
+                      <i class="fa-solid fa-calendar-day text-primary me-1"></i>
+                      {{ booking.start_date|date:"M d, Y" }}
+                    </span>
+                    <span><i class="fa-solid fa-arrow-right text-muted"></i></span>
+                    <span>
+                      <i class="fa-solid fa-calendar-xmark text-danger me-1"></i>
+                      {{ booking.end_date|date:"M d, Y" }}
+                    </span>
+                    <span>
+                      <i class="fa-solid fa-moon text-primary me-1"></i>
+                      {{ booking.duration_days }} day{{ booking.duration_days|pluralize }}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Status + cost -->
+                <div class="text-end">
+                  <span class="badge fs-6 mb-1
+                    {% if booking.status == 'pending' %}bg-warning text-dark
+                    {% elif booking.status == 'approved' %}bg-success
+                    {% elif booking.status == 'rejected' %}bg-danger
+                    {% else %}bg-secondary{% endif %}">
+                    {% if booking.status == 'pending' %}
+                      <i class="fa-solid fa-clock me-1"></i>
+                    {% elif booking.status == 'approved' %}
+                      <i class="fa-solid fa-circle-check me-1"></i>
+                    {% elif booking.status == 'rejected' %}
+                      <i class="fa-solid fa-circle-xmark me-1"></i>
+                    {% else %}
+                      <i class="fa-solid fa-ban me-1"></i>
+                    {% endif %}
+                    {{ booking.get_status_display }}
+                  </span>
+                  <p class="fw-bold text-primary mb-0 small">
+                    KES {{ booking.total_cost|floatformat:0 }}
+                  </p>
+                </div>
+              </div>
+
+              <!-- Message if any -->
+              {% if booking.message %}
+                <p class="text-muted small mt-2 mb-0 fst-italic">
+                  <i class="fa-solid fa-quote-left me-1"></i>
+                  {{ booking.message }}
+                </p>
+              {% endif %}
+
+              <!-- Action buttons -->
+              {% if booking.status in 'pending,approved' %}
+                <div class="mt-3">
+                  <a href="{% url 'cancel_booking' booking.pk %}"
+                     class="btn btn-outline-danger btn-sm">
+                    <i class="fa-solid fa-ban me-1"></i>Cancel Booking
+                  </a>
+                  <a href="{% url 'house_detail' booking.house.pk %}"
+                     class="btn btn-outline-primary btn-sm ms-2">
+                    <i class="fa-solid fa-eye me-1"></i>View House
+                  </a>
+                </div>
+              {% endif %}
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+{% else %}
+  <div class="text-center py-5">
+    <i class="fa-solid fa-calendar-xmark fa-4x text-muted mb-3"></i>
+    <h5 class="text-muted">No bookings found</h5>
+    <p class="text-muted">
+      {% if status_filter != 'all' %}
+        No {{ status_filter }} bookings yet.
+        <a href="?status=all">View all bookings</a>
+      {% else %}
+        You haven't made any bookings yet.
+      {% endif %}
+    </p>
+    <a href="{% url 'house_list' %}" class="btn btn-primary">
+      <i class="fa-solid fa-magnifying-glass me-2"></i>Browse Houses
+    </a>
+  </div>
+{% endif %}
+
+{% endblock %}

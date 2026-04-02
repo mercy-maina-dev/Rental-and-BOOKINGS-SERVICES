@@ -1,0 +1,227 @@
+{% extends 'base.html' %}
+{% block title %}Login — RentEase{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center align-items-center py-5">
+  <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5">
+
+    <!-- Header -->
+    <div class="text-center mb-4">
+      <div class="bg-primary bg-gradient d-inline-flex align-items-center
+                  justify-content-center rounded-circle mb-3"
+           style="width:68px;height:68px;">
+        <i class="fa-solid fa-right-to-bracket fa-xl text-white"></i>
+      </div>
+      <h2 class="fw-bold">Welcome Back</h2>
+      <p class="text-muted mb-0">Select your portal and sign in</p>
+    </div>
+
+    <!-- Portal selector — these are PROTECTED ROUTE gates -->
+    <div class="d-flex rounded-3 p-1 mb-3 gap-2" style="background:#e0e7ff;">
+      <button type="button" id="tab-tenant"
+              onclick="switchRole('tenant')"
+              class="btn flex-grow-1 fw-semibold py-2 role-tab active-tab">
+        <i class="fa-solid fa-person me-2"></i>Tenant Portal
+      </button>
+      <button type="button" id="tab-landlord"
+              onclick="switchRole('landlord')"
+              class="btn flex-grow-1 fw-semibold py-2 role-tab">
+        <i class="fa-solid fa-key me-2"></i>Landlord Portal
+      </button>
+    </div>
+
+    <!-- Portal info banner -->
+    <div id="role-banner"
+         class="alert d-flex align-items-center gap-3 mb-4 border-0 rounded-3"
+         style="background:linear-gradient(135deg,#d1fae5,#a7f3d0);">
+      <div id="banner-icon"
+           class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+           style="width:44px;height:44px;background:#10b981;">
+        <i id="banner-i" class="fa-solid fa-shield-halved text-white"></i>
+      </div>
+      <div>
+        <p id="banner-title" class="fw-bold mb-0">
+          Tenant Portal
+        </p>
+        <p id="banner-sub" class="mb-0 small text-muted">
+          Only tenant accounts can access this portal
+        </p>
+      </div>
+    </div>
+
+    <!-- Form card -->
+    <div class="card p-4 p-md-5">
+      <form method="post" novalidate>
+        {% csrf_token %}
+        <input type="hidden" name="selected_role" id="selected_role"
+               value="{{ selected_role|default:'tenant' }}">
+
+        <!-- Username -->
+        <div class="mb-3">
+          <label class="form-label fw-semibold">
+            <i class="fa-solid fa-user text-primary me-1"></i>Username
+          </label>
+          <div class="input-group">
+            <span class="input-group-text bg-light">
+              <i class="fa-solid fa-user text-muted"></i>
+            </span>
+            {{ form.username }}
+          </div>
+          {% if form.username.errors %}
+            <div class="text-danger small mt-1">
+              <i class="fa-solid fa-circle-exclamation me-1"></i>
+              {{ form.username.errors.0 }}
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Password -->
+        <div class="mb-4">
+          <label class="form-label fw-semibold">
+            <i class="fa-solid fa-lock text-primary me-1"></i>Password
+          </label>
+          <div class="input-group">
+            <span class="input-group-text bg-light">
+              <i class="fa-solid fa-lock text-muted"></i>
+            </span>
+            {{ form.password }}
+            <button class="btn btn-outline-secondary" type="button"
+                    onclick="togglePass('id_password', this)">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </div>
+          {% if form.password.errors %}
+            <div class="text-danger small mt-1">
+              <i class="fa-solid fa-circle-exclamation me-1"></i>
+              {{ form.password.errors.0 }}
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Submit -->
+        <button type="submit" id="login-btn"
+                class="btn w-100 py-2 fw-semibold text-white"
+                style="background:linear-gradient(135deg,#2563eb,#1e40af);border:none;">
+          <i class="fa-solid fa-right-to-bracket me-2"></i>
+          Sign in as <span id="btn-role-label">Tenant</span>
+        </button>
+
+      </form>
+
+      <hr class="my-4"/>
+
+      <!-- Wrong portal hint -->
+      <div class="text-center mb-3">
+        <p class="text-muted small mb-1">Signed up as a landlord?</p>
+        <button type="button" onclick="switchRole('landlord')"
+                class="btn btn-outline-warning btn-sm px-4">
+          <i class="fa-solid fa-key me-1"></i>Switch to Landlord Portal
+        </button>
+      </div>
+
+      <p class="text-center text-muted mb-0">
+        Don't have an account?
+        <a href="{% url 'register' %}" class="fw-semibold text-primary">
+          Register here
+        </a>
+      </p>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  .role-tab {
+    border-radius: 8px !important;
+    color: #64748b;
+    background: transparent;
+    border: none;
+    transition: all 0.25s;
+  }
+  .role-tab.active-tab {
+    background: #fff;
+    color: #2563eb;
+    box-shadow: 0 2px 8px rgba(37,99,235,0.15);
+  }
+  .role-tab:hover:not(.active-tab) {
+    background: rgba(255,255,255,0.5);
+  }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // On page load — restore the selected role from server
+  (function () {
+    const role = document.getElementById('selected_role').value || 'tenant';
+    applyRole(role);
+  })();
+
+  function switchRole(role) {
+    document.getElementById('selected_role').value = role;
+    applyRole(role);
+  }
+
+  function applyRole(role) {
+    const isTenant = role === 'tenant';
+
+    // tabs
+    document.querySelectorAll('.role-tab').forEach(t => t.classList.remove('active-tab'));
+    document.getElementById('tab-' + role).classList.add('active-tab');
+
+    // banner
+    document.getElementById('role-banner').style.background = isTenant
+      ? 'linear-gradient(135deg,#d1fae5,#a7f3d0)'
+      : 'linear-gradient(135deg,#fef3c7,#fde68a)';
+
+    document.getElementById('banner-icon').style.background =
+      isTenant ? '#10b981' : '#f59e0b';
+
+    document.getElementById('banner-i').className =
+      'fa-solid text-white fa-shield-halved';
+
+    document.getElementById('banner-title').textContent =
+      isTenant ? 'Tenant Portal' : 'Landlord Portal';
+
+    document.getElementById('banner-sub').textContent = isTenant
+      ? 'Only tenant accounts can access this portal'
+      : 'Only landlord accounts can access this portal';
+
+    // button
+    document.getElementById('login-btn').style.background = isTenant
+      ? 'linear-gradient(135deg,#2563eb,#1e40af)'
+      : 'linear-gradient(135deg,#f59e0b,#d97706)';
+
+    document.getElementById('btn-role-label').textContent =
+      isTenant ? 'Tenant' : 'Landlord';
+  }
+
+  function togglePass(fieldId, btn) {
+    const input = document.getElementById(fieldId);
+    const icon  = btn.querySelector('i');
+    if (input.type === 'password') {
+      input.type = 'text';
+      icon.classList.replace('fa-eye', 'fa-eye-slash');
+    } else {
+      input.type = 'password';
+      icon.classList.replace('fa-eye-slash', 'fa-eye');
+    }
+  }
+</script>
+{% endblock %}
+```
+
+---
+
+### The complete flow now
+```
+/register  →  Tab = "who are you signing up as?"
+               Tenant tab  → creates tenant account → tenant dashboard
+               Landlord tab → creates landlord account → landlord dashboard
+
+/login     →  Tab = "which protected portal?"
+               Tenant portal  → landlord tries it → ❌ toast blocked
+               Landlord portal → tenant tries it  → ❌ toast blocked
+               Correct match  → ✅ redirected to role dashboard

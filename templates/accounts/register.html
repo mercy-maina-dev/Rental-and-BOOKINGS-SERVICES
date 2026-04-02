@@ -1,0 +1,258 @@
+{% extends 'base.html' %}
+{% block title %}Register — RentEase{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center align-items-center py-5">
+  <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5">
+
+    <!-- Header -->
+    <div class="text-center mb-4">
+      <div class="bg-primary bg-gradient d-inline-flex align-items-center
+                  justify-content-center rounded-circle mb-3"
+           style="width:68px;height:68px;">
+        <i class="fa-solid fa-user-plus fa-xl text-white"></i>
+      </div>
+      <h2 class="fw-bold">Create Account</h2>
+      <p class="text-muted mb-0">First, tell us who you are</p>
+    </div>
+
+    <!-- Step 1 label -->
+    <div class="d-flex align-items-center gap-2 mb-2">
+      <span class="badge bg-primary rounded-pill px-3 py-2">Step 1</span>
+      <span class="fw-semibold text-dark">Choose your account type</span>
+    </div>
+
+    <!-- Role selector tabs -->
+    <div class="d-flex rounded-3 p-1 mb-3 gap-2" style="background:#e0e7ff;">
+      <button type="button" id="tab-tenant"
+              onclick="switchRole('tenant')"
+              class="btn flex-grow-1 fw-semibold py-2 role-tab active-tab">
+        <i class="fa-solid fa-person me-2"></i>I'm a Tenant
+      </button>
+      <button type="button" id="tab-landlord"
+              onclick="switchRole('landlord')"
+              class="btn flex-grow-1 fw-semibold py-2 role-tab">
+        <i class="fa-solid fa-key me-2"></i>I'm a Landlord
+      </button>
+    </div>
+
+    <!-- Role description banner -->
+    <div id="role-banner"
+         class="alert d-flex align-items-center gap-3 mb-4 border-0 rounded-3"
+         style="background:linear-gradient(135deg,#d1fae5,#a7f3d0);">
+      <div id="banner-icon"
+           class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+           style="width:44px;height:44px;background:#10b981;">
+        <i id="banner-i" class="fa-solid fa-person text-white"></i>
+      </div>
+      <div>
+        <p id="banner-title" class="fw-bold mb-0">Tenant Account</p>
+        <p id="banner-sub" class="mb-0 small text-muted">
+          Search, view and book rental houses
+        </p>
+      </div>
+    </div>
+
+    <!-- Step 2 label -->
+    <div class="d-flex align-items-center gap-2 mb-3">
+      <span class="badge bg-primary rounded-pill px-3 py-2">Step 2</span>
+      <span class="fw-semibold text-dark">Fill in your details</span>
+    </div>
+
+    <!-- Form card -->
+    <div class="card p-4 p-md-5">
+      <form method="post" novalidate>
+        {% csrf_token %}
+        <input type="hidden" name="role" id="role-input" value="tenant">
+
+        <!-- Username -->
+        <div class="mb-3">
+          <label class="form-label fw-semibold">
+            <i class="fa-solid fa-user text-primary me-1"></i>Username
+          </label>
+          <div class="input-group">
+            <span class="input-group-text bg-light">
+              <i class="fa-solid fa-user text-muted"></i>
+            </span>
+            {{ form.username }}
+          </div>
+          {% if form.username.errors %}
+            <div class="text-danger small mt-1">
+              <i class="fa-solid fa-circle-exclamation me-1"></i>
+              {{ form.username.errors.0 }}
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Email -->
+        <div class="mb-3">
+          <label class="form-label fw-semibold">
+            <i class="fa-solid fa-envelope text-primary me-1"></i>Email
+          </label>
+          <div class="input-group">
+            <span class="input-group-text bg-light">
+              <i class="fa-solid fa-envelope text-muted"></i>
+            </span>
+            {{ form.email }}
+          </div>
+          {% if form.email.errors %}
+            <div class="text-danger small mt-1">
+              <i class="fa-solid fa-circle-exclamation me-1"></i>
+              {{ form.email.errors.0 }}
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Phone -->
+        <div class="mb-3">
+          <label class="form-label fw-semibold">
+            <i class="fa-solid fa-phone text-primary me-1"></i>Phone
+            <span class="text-muted fw-normal small">(optional)</span>
+          </label>
+          <div class="input-group">
+            <span class="input-group-text bg-light">
+              <i class="fa-solid fa-phone text-muted"></i>
+            </span>
+            {{ form.phone }}
+          </div>
+        </div>
+
+        <!-- Password -->
+        <div class="mb-3">
+          <label class="form-label fw-semibold">
+            <i class="fa-solid fa-lock text-primary me-1"></i>Password
+          </label>
+          <div class="input-group">
+            <span class="input-group-text bg-light">
+              <i class="fa-solid fa-lock text-muted"></i>
+            </span>
+            {{ form.password1 }}
+            <button class="btn btn-outline-secondary" type="button"
+                    onclick="togglePass('id_password1', this)">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </div>
+          {% if form.password1.errors %}
+            <div class="text-danger small mt-1">
+              <i class="fa-solid fa-circle-exclamation me-1"></i>
+              {{ form.password1.errors.0 }}
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Confirm Password -->
+        <div class="mb-4">
+          <label class="form-label fw-semibold">
+            <i class="fa-solid fa-lock text-primary me-1"></i>Confirm Password
+          </label>
+          <div class="input-group">
+            <span class="input-group-text bg-light">
+              <i class="fa-solid fa-lock text-muted"></i>
+            </span>
+            {{ form.password2 }}
+            <button class="btn btn-outline-secondary" type="button"
+                    onclick="togglePass('id_password2', this)">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </div>
+          {% if form.password2.errors %}
+            <div class="text-danger small mt-1">
+              <i class="fa-solid fa-circle-exclamation me-1"></i>
+              {{ form.password2.errors.0 }}
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Submit -->
+        <button type="submit" id="register-btn"
+                class="btn w-100 py-2 fw-semibold text-white"
+                style="background:linear-gradient(135deg,#2563eb,#1e40af);border:none;">
+          <i class="fa-solid fa-user-plus me-2"></i>
+          Create <span id="btn-role-label">Tenant</span> Account
+        </button>
+
+      </form>
+
+      <hr class="my-4"/>
+      <p class="text-center text-muted mb-0">
+        Already have an account?
+        <a href="{% url 'login' %}" class="fw-semibold text-primary">
+          Login here
+        </a>
+      </p>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  .role-tab {
+    border-radius: 8px !important;
+    color: #64748b;
+    background: transparent;
+    border: none;
+    transition: all 0.25s;
+  }
+  .role-tab.active-tab {
+    background: #fff;
+    color: #2563eb;
+    box-shadow: 0 2px 8px rgba(37,99,235,0.15);
+  }
+  .role-tab:hover:not(.active-tab) {
+    background: rgba(255,255,255,0.5);
+  }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function switchRole(role) {
+    document.getElementById('role-input').value = role;
+
+    document.querySelectorAll('.role-tab').forEach(t => t.classList.remove('active-tab'));
+    document.getElementById('tab-' + role).classList.add('active-tab');
+
+    const isTenant = role === 'tenant';
+
+    // banner
+    document.getElementById('role-banner').style.background = isTenant
+      ? 'linear-gradient(135deg,#d1fae5,#a7f3d0)'
+      : 'linear-gradient(135deg,#fef3c7,#fde68a)';
+
+    document.getElementById('banner-icon').style.background =
+      isTenant ? '#10b981' : '#f59e0b';
+
+    document.getElementById('banner-i').className =
+      'fa-solid text-white ' + (isTenant ? 'fa-person' : 'fa-key');
+
+    document.getElementById('banner-title').textContent =
+      isTenant ? 'Tenant Account' : 'Landlord Account';
+
+    document.getElementById('banner-sub').textContent = isTenant
+      ? 'Search, view and book rental houses'
+      : 'List properties and manage booking requests';
+
+    // button
+    document.getElementById('register-btn').style.background = isTenant
+      ? 'linear-gradient(135deg,#2563eb,#1e40af)'
+      : 'linear-gradient(135deg,#f59e0b,#d97706)';
+
+    document.getElementById('btn-role-label').textContent =
+      isTenant ? 'Tenant' : 'Landlord';
+  }
+
+  function togglePass(fieldId, btn) {
+    const input = document.getElementById(fieldId);
+    const icon  = btn.querySelector('i');
+    if (input.type === 'password') {
+      input.type = 'text';
+      icon.classList.replace('fa-eye', 'fa-eye-slash');
+    } else {
+      input.type = 'password';
+      icon.classList.replace('fa-eye-slash', 'fa-eye');
+    }
+  }
+</script>
+{% endblock %}

@@ -1,0 +1,193 @@
+{% extends 'base.html' %}
+{% block title %}Manage Bookings — {{ house.title }}{% endblock %}
+
+{% block content %}
+
+<!-- Header -->
+<div class="page-header px-4 mb-4">
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+    <div>
+      <h3 class="fw-bold mb-1">
+        <i class="fa-solid fa-calendar-days me-2" style="color:#f59e0b"></i>
+        Booking Requests
+      </h3>
+      <p class="mb-0 opacity-75">
+        <i class="fa-solid fa-house me-1"></i>{{ house.title }}
+        &nbsp;·&nbsp;
+        <i class="fa-solid fa-location-dot me-1"></i>{{ house.location }}
+      </p>
+    </div>
+    <a href="{% url 'landlord_dashboard' %}"
+       class="btn btn-outline-light btn-sm">
+      <i class="fa-solid fa-arrow-left me-1"></i>Dashboard
+    </a>
+  </div>
+</div>
+
+<!-- Stats row -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-3">
+    <div class="card p-3 text-center" style="border-left:4px solid #2563eb;">
+      <h3 class="fw-bold mb-0 text-primary">{{ counts.all }}</h3>
+      <small class="text-muted">Total</small>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card p-3 text-center" style="border-left:4px solid #f59e0b;">
+      <h3 class="fw-bold mb-0 text-warning">{{ counts.pending }}</h3>
+      <small class="text-muted">Pending</small>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card p-3 text-center" style="border-left:4px solid #10b981;">
+      <h3 class="fw-bold mb-0 text-success">{{ counts.approved }}</h3>
+      <small class="text-muted">Approved</small>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card p-3 text-center" style="border-left:4px solid #ef4444;">
+      <h3 class="fw-bold mb-0 text-danger">{{ counts.rejected }}</h3>
+      <small class="text-muted">Rejected</small>
+    </div>
+  </div>
+</div>
+
+<!-- Filter tabs -->
+<div class="card p-3 mb-4">
+  <div class="d-flex flex-wrap gap-2">
+    <a href="?status=all"
+       class="btn btn-sm fw-semibold
+              {% if status_filter == 'all' %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+      <i class="fa-solid fa-list me-1"></i>All
+    </a>
+    <a href="?status=pending"
+       class="btn btn-sm fw-semibold
+              {% if status_filter == 'pending' %}btn-warning text-dark{% else %}btn-outline-warning{% endif %}">
+      <i class="fa-solid fa-clock me-1"></i>Pending
+    </a>
+    <a href="?status=approved"
+       class="btn btn-sm fw-semibold
+              {% if status_filter == 'approved' %}btn-success{% else %}btn-outline-success{% endif %}">
+      <i class="fa-solid fa-circle-check me-1"></i>Approved
+    </a>
+    <a href="?status=rejected"
+       class="btn btn-sm fw-semibold
+              {% if status_filter == 'rejected' %}btn-danger{% else %}btn-outline-danger{% endif %}">
+      <i class="fa-solid fa-circle-xmark me-1"></i>Rejected
+    </a>
+  </div>
+</div>
+
+<!-- Bookings -->
+{% if bookings %}
+  <div class="row g-3">
+    {% for booking in bookings %}
+    <div class="col-12">
+      <div class="card p-3 p-md-4"
+           style="border-left:4px solid
+             {% if booking.status == 'approved' %}#10b981
+             {% elif booking.status == 'pending' %}#f59e0b
+             {% elif booking.status == 'rejected' %}#ef4444
+             {% else %}#6b7280{% endif %};">
+
+        <div class="row align-items-center g-3">
+          <div class="col-12 col-md-7">
+
+            <!-- Tenant info -->
+            <div class="d-flex align-items-center gap-3 mb-2">
+              <div class="bg-primary bg-gradient rounded-circle d-flex align-items-center
+                          justify-content-center text-white fw-bold flex-shrink-0"
+                   style="width:40px;height:40px;">
+                {{ booking.tenant.username|first|upper }}
+              </div>
+              <div>
+                <p class="fw-bold mb-0">{{ booking.tenant.username }}</p>
+                <p class="text-muted small mb-0">
+                  {% if booking.tenant.phone %}
+                    <i class="fa-solid fa-phone me-1"></i>{{ booking.tenant.phone }}
+                  {% else %}
+                    <i class="fa-solid fa-envelope me-1"></i>{{ booking.tenant.email }}
+                  {% endif %}
+                </p>
+              </div>
+            </div>
+
+            <!-- Dates & duration -->
+            <div class="d-flex flex-wrap gap-3 text-muted small mb-2">
+              <span>
+                <i class="fa-solid fa-calendar-day text-primary me-1"></i>
+                {{ booking.start_date|date:"M d, Y" }}
+              </span>
+              <span><i class="fa-solid fa-arrow-right"></i></span>
+              <span>
+                <i class="fa-solid fa-calendar-xmark text-danger me-1"></i>
+                {{ booking.end_date|date:"M d, Y" }}
+              </span>
+              <span>
+                <i class="fa-solid fa-moon text-primary me-1"></i>
+                {{ booking.duration_days }} day{{ booking.duration_days|pluralize }}
+              </span>
+            </div>
+
+            {% if booking.message %}
+              <p class="text-muted small fst-italic mb-0">
+                <i class="fa-solid fa-quote-left me-1"></i>{{ booking.message }}
+              </p>
+            {% endif %}
+
+          </div>
+
+          <!-- Right: cost + status + actions -->
+          <div class="col-12 col-md-5">
+            <div class="d-flex flex-column align-items-md-end gap-2">
+
+              <div class="text-md-end">
+                <p class="text-muted small mb-0">Estimated Revenue</p>
+                <h5 class="fw-bold text-primary mb-0">
+                  KES {{ booking.total_cost|floatformat:0 }}
+                </h5>
+              </div>
+
+              <span class="badge px-3 py-2
+                {% if booking.status == 'pending' %}bg-warning text-dark
+                {% elif booking.status == 'approved' %}bg-success
+                {% elif booking.status == 'rejected' %}bg-danger
+                {% else %}bg-secondary{% endif %}">
+                {{ booking.get_status_display }}
+              </span>
+
+              {% if booking.status == 'pending' %}
+                <div class="d-flex gap-2">
+                  <form method="post" action="{% url 'approve_booking' booking.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success btn-sm px-3 fw-semibold">
+                      <i class="fa-solid fa-circle-check me-1"></i>Approve
+                    </button>
+                  </form>
+                  <form method="post" action="{% url 'reject_booking' booking.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger btn-sm px-3 fw-semibold">
+                      <i class="fa-solid fa-circle-xmark me-1"></i>Reject
+                    </button>
+                  </form>
+                </div>
+              {% endif %}
+
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+{% else %}
+  <div class="text-center py-5">
+    <i class="fa-solid fa-calendar-xmark fa-4x text-muted mb-3"></i>
+    <h5 class="text-muted">No booking requests yet</h5>
+    <p class="text-muted">Requests will appear here once tenants apply.</p>
+  </div>
+{% endif %}
+
+{% endblock %}

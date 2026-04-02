@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% block title %}My Dashboard — RentEase{% endblock %}
+
+{% block content %}
+
+<div class="page-header px-4 mb-4">
+  <h3 class="fw-bold mb-1">
+    <i class="fa-solid fa-gauge me-2" style="color:#f59e0b"></i>
+    Welcome, {{ user.username }}!
+  </h3>
+  <p class="mb-0 opacity-75">Track your bookings and find new homes</p>
+</div>
+
+<!-- Stats -->
+<div class="row g-3 mb-4">
+  <div class="col-4">
+    <div class="card p-3 text-center" style="border-left:4px solid #2563eb;">
+      <i class="fa-solid fa-calendar-days fa-2x text-primary mb-2"></i>
+      <h3 class="fw-bold mb-0">{{ total }}</h3>
+      <small class="text-muted">Total Bookings</small>
+    </div>
+  </div>
+  <div class="col-4">
+    <div class="card p-3 text-center" style="border-left:4px solid #f59e0b;">
+      <i class="fa-solid fa-clock fa-2x text-warning mb-2"></i>
+      <h3 class="fw-bold mb-0">{{ pending_count }}</h3>
+      <small class="text-muted">Pending</small>
+    </div>
+  </div>
+  <div class="col-4">
+    <div class="card p-3 text-center" style="border-left:4px solid #10b981;">
+      <i class="fa-solid fa-circle-check fa-2x text-success mb-2"></i>
+      <h3 class="fw-bold mb-0">{{ approved_count }}</h3>
+      <small class="text-muted">Approved</small>
+    </div>
+  </div>
+</div>
+
+<!-- Quick actions -->
+<div class="row g-3 mb-4">
+  <div class="col-12 col-sm-6">
+    <a href="{% url 'house_list' %}" class="card p-4 text-decoration-none text-center h-100
+       d-flex flex-column align-items-center justify-content-center"
+       style="border:2px dashed #2563eb;">
+      <i class="fa-solid fa-magnifying-glass fa-2x text-primary mb-2"></i>
+      <p class="fw-semibold text-primary mb-0">Browse Houses</p>
+    </a>
+  </div>
+  <div class="col-12 col-sm-6">
+    <a href="{% url 'my_bookings' %}" class="card p-4 text-decoration-none text-center h-100
+       d-flex flex-column align-items-center justify-content-center"
+       style="border:2px dashed #10b981;">
+      <i class="fa-solid fa-calendar-check fa-2x text-success mb-2"></i>
+      <p class="fw-semibold text-success mb-0">View All Bookings</p>
+    </a>
+  </div>
+</div>
+
+<!-- Recent bookings -->
+{% if bookings %}
+<div class="card p-4">
+  <h5 class="fw-bold mb-3">
+    <i class="fa-solid fa-clock-rotate-left text-primary me-2"></i>Recent Bookings
+  </h5>
+  {% for booking in bookings %}
+  <div class="d-flex justify-content-between align-items-center p-3 rounded mb-2"
+       style="background:#f8fafc;border-left:4px solid
+       {% if booking.status == 'approved' %}#10b981
+       {% elif booking.status == 'rejected' %}#ef4444
+       {% elif booking.status == 'cancelled' %}#6b7280
+       {% else %}#f59e0b{% endif %}">
+    <div>
+      <p class="fw-semibold mb-0">{{ booking.house.title }}</p>
+      <small class="text-muted">
+        <i class="fa-solid fa-calendar me-1"></i>
+        {{ booking.start_date }} → {{ booking.end_date }}
+      </small>
+    </div>
+    <span class="badge
+      {% if booking.status == 'pending' %}bg-warning text-dark
+      {% elif booking.status == 'approved' %}bg-success
+      {% elif booking.status == 'rejected' %}bg-danger
+      {% else %}bg-secondary{% endif %}">
+      {{ booking.get_status_display }}
+    </span>
+  </div>
+  {% endfor %}
+  <a href="{% url 'my_bookings' %}" class="btn btn-outline-primary btn-sm mt-2">
+    View All <i class="fa-solid fa-arrow-right ms-1"></i>
+  </a>
+</div>
+{% endif %}
+
+{% endblock %}

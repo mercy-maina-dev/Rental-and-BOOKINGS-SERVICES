@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% block title %}My Profile — RentEase{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-4">
+  <div class="col-12 col-md-8 col-lg-6">
+
+    <!-- Header -->
+    <div class="text-center mb-4">
+      <div class="bg-primary bg-gradient d-inline-flex align-items-center justify-content-center rounded-circle mb-3"
+           style="width:72px;height:72px;">
+        <i class="fa-solid fa-user fa-2x text-white"></i>
+      </div>
+      <h3 class="fw-bold">{{ user.username }}</h3>
+      <span class="role-badge
+        {% if user.is_tenant %}badge-tenant
+        {% elif user.is_landlord %}badge-landlord
+        {% else %}badge-admin{% endif %}">
+        {{ user.role|title }}
+      </span>
+    </div>
+
+    <div class="card p-4 p-md-5">
+      <h5 class="fw-bold mb-4">
+        <i class="fa-solid fa-pen-to-square text-primary me-2"></i>Edit Profile
+      </h5>
+      <form method="post" novalidate>
+        {% csrf_token %}
+
+        <div class="row g-3">
+          <div class="col-12 col-sm-6">
+            <label class="form-label fw-semibold">First Name</label>
+            {{ form.first_name }}
+          </div>
+          <div class="col-12 col-sm-6">
+            <label class="form-label fw-semibold">Last Name</label>
+            {{ form.last_name }}
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-semibold">
+              <i class="fa-solid fa-user text-primary me-1"></i>Username
+            </label>
+            {{ form.username }}
+            {% if form.username.errors %}
+              <div class="text-danger small mt-1">{{ form.username.errors.0 }}</div>
+            {% endif %}
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-semibold">
+              <i class="fa-solid fa-envelope text-primary me-1"></i>Email
+            </label>
+            {{ form.email }}
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-semibold">
+              <i class="fa-solid fa-phone text-primary me-1"></i>Phone
+            </label>
+            {{ form.phone }}
+          </div>
+        </div>
+
+        <div class="d-grid mt-4">
+          <button type="submit" class="btn btn-primary py-2 fw-semibold">
+            <i class="fa-solid fa-floppy-disk me-2"></i>Save Changes
+          </button>
+        </div>
+      </form>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% block title %}{{ action }} Listing — RentEase{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-12 col-lg-8">
+
+    <div class="text-center mb-4">
+      <div class="bg-primary bg-gradient d-inline-flex align-items-center justify-content-center rounded-circle mb-3"
+           style="width:64px;height:64px;">
+        <i class="fa-solid {% if action == 'Add' %}fa-plus{% else %}fa-pen{% endif %} fa-xl text-white"></i>
+      </div>
+      <h3 class="fw-bold">{{ action }} House Listing</h3>
+      <p class="text-muted">Fill in the details below to {{ action|lower }} your listing.</p>
+    </div>
+
+    <div class="card p-4 p-md-5">
+      <form method="post" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+
+        <div class="row g-3">
+
+          <!-- Title -->
+          <div class="col-12">
+            <label class="form-label fw-semibold">
+              <i class="fa-solid fa-heading text-primary me-1"></i>Title
+            </label>
+            {{ form.title }}
+            {% if form.title.errors %}<div class="text-danger small mt-1">{{ form.title.errors.0 }}</div>{% endif %}
+          </div>
+
+          <!-- Location & Price -->
+          <div class="col-12 col-sm-6">
+            <label class="form-label fw-semibold">
+              <i class="fa-solid fa-location-dot text-danger me-1"></i>Location
+            </label>
+            {{ form.location }}
+            {% if form.location.errors %}<div class="text-danger small mt-1">{{ form.location.errors.0 }}</div>{% endif %}
+          </div>
+          <div class="col-12 col-sm-6">
+            <label class="form-label fw-semibold">
+              <i class="fa-solid fa-money-bill text-success me-1"></i>Monthly Rent (KES)
+            </label>
+            {{ form.price }}
+            {% if form.price.errors %}<div class="text-danger small mt-1">{{ form.price.errors.0 }}</div>{% endif %}
+          </div>
+
+          <!-- Bedrooms & Availability -->
+          <div class="col-12 col-sm-6">
+            <label class="form-label fw-semibold">
+              <i class="fa-solid fa-bed text-primary me-1"></i>Bedrooms
+            </label>
+            {{ form.bedrooms }}
+          </div>
+          <div class="col-12 col-sm-6">
+            <label class="form-label fw-semibold">
+              <i class="fa-solid fa-toggle-on text-primary me-1"></i>Availability
+            </label>
+            {{ form.availability }}
+          </div>
+
+          <!-- Description -->
+          <div class="col-12">
+            <label class="form-label fw-semibold">
+              <i class="fa-solid fa-align-left text-primary me-1"></i>Description
+            </label>
+            {{ form.description }}
+          </div>
+
+          <!-- Image -->
+          <div class="col-12">
+            <label class="form-label fw-semibold">
+              <i class="fa-solid fa-image text-primary me-1"></i>House Photo
+            </label>
+            {{ form.image }}
+            {% if house.image %}
+              <div class="mt-2">
+                <img src="{{ house.image.url }}" class="rounded" style="height:80px;object-fit:cover;" alt="Current">
+                <small class="text-muted ms-2">Current photo</small>
+              </div>
+            {% endif %}
+          </div>
+
+        </div>
+
+        <!-- Buttons -->
+        <div class="d-flex gap-2 mt-4">
+          <button type="submit" class="btn btn-primary flex-grow-1 py-2 fw-semibold">
+            <i class="fa-solid fa-floppy-disk me-2"></i>{{ action }} Listing
+          </button>
+          <a href="{% url 'landlord_dashboard' %}" class="btn btn-outline-secondary px-4">
+            <i class="fa-solid fa-xmark me-1"></i>Cancel
+          </a>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

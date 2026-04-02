@@ -1,0 +1,227 @@
+{% extends 'base.html' %}
+{% block title %}Book {{ house.title }} — RentEase{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-12 col-lg-9">
+
+    <!-- House summary banner -->
+    <div class="card mb-4 overflow-hidden">
+      <div class="row g-0">
+        {% if house.image %}
+          <div class="col-12 col-md-4">
+            <img src="{{ house.image.url }}" class="w-100 h-100"
+                 style="object-fit:cover;min-height:180px;" alt="{{ house.title }}">
+          </div>
+        {% endif %}
+        <div class="col-12 col-md-{% if house.image %}8{% else %}12{% endif %}">
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+              <div>
+                <h4 class="fw-bold mb-1">{{ house.title }}</h4>
+                <p class="text-muted mb-2">
+                  <i class="fa-solid fa-location-dot text-danger me-1"></i>
+                  {{ house.location }}
+                </p>
+                <div class="d-flex flex-wrap gap-2">
+                  <span class="badge bg-light text-dark border px-3 py-2">
+                    <i class="fa-solid fa-bed text-primary me-1"></i>
+                    {{ house.bedrooms }} Bedroom{{ house.bedrooms|pluralize }}
+                  </span>
+                  <span class="badge bg-light text-dark border px-3 py-2">
+                    <i class="fa-solid fa-user text-primary me-1"></i>
+                    {{ house.landlord.username }}
+                  </span>
+                </div>
+              </div>
+              <div class="text-end">
+                <p class="text-muted small mb-0">Monthly Rent</p>
+                <h4 class="fw-bold text-primary mb-0">
+                  KES {{ house.price|floatformat:0 }}
+                </h4>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-4">
+
+      <!-- Booking form -->
+      <div class="col-12 col-md-7">
+        <div class="card p-4">
+          <h5 class="fw-bold mb-4">
+            <i class="fa-solid fa-calendar-plus text-primary me-2"></i>
+            Booking Details
+          </h5>
+          <form method="post" novalidate>
+            {% csrf_token %}
+
+            <!-- Dates row -->
+            <div class="row g-3 mb-3">
+              <div class="col-12 col-sm-6">
+                <label class="form-label fw-semibold">
+                  <i class="fa-solid fa-calendar-day text-primary me-1"></i>
+                  Move-in Date
+                </label>
+                {{ form.start_date }}
+                {% if form.start_date.errors %}
+                  <div class="text-danger small mt-1">
+                    <i class="fa-solid fa-circle-exclamation me-1"></i>
+                    {{ form.start_date.errors.0 }}
+                  </div>
+                {% endif %}
+              </div>
+              <div class="col-12 col-sm-6">
+                <label class="form-label fw-semibold">
+                  <i class="fa-solid fa-calendar-xmark text-danger me-1"></i>
+                  Move-out Date
+                </label>
+                {{ form.end_date }}
+                {% if form.end_date.errors %}
+                  <div class="text-danger small mt-1">
+                    <i class="fa-solid fa-circle-exclamation me-1"></i>
+                    {{ form.end_date.errors.0 }}
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+
+            <!-- Message -->
+            <div class="mb-4">
+              <label class="form-label fw-semibold">
+                <i class="fa-solid fa-message text-primary me-1"></i>
+                Message to Landlord
+                <span class="text-muted fw-normal small">(optional)</span>
+              </label>
+              {{ form.message }}
+            </div>
+
+            <!-- Cost preview -->
+            <div id="cost-preview"
+                 class="rounded-3 p-3 mb-4 d-none"
+                 style="background:linear-gradient(135deg,#eff6ff,#dbeafe);">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <p class="text-muted small mb-0">Estimated Total</p>
+                  <h4 class="fw-bold text-primary mb-0" id="cost-amount">KES 0</h4>
+                </div>
+                <div class="text-end">
+                  <p class="text-muted small mb-0">Duration</p>
+                  <p class="fw-semibold mb-0" id="cost-days">0 days</p>
+                </div>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold">
+              <i class="fa-solid fa-paper-plane me-2"></i>
+              Submit Booking Request
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Info sidebar -->
+      <div class="col-12 col-md-5">
+
+        <!-- What happens next -->
+        <div class="card p-4 mb-3">
+          <h6 class="fw-bold mb-3">
+            <i class="fa-solid fa-circle-info text-primary me-2"></i>
+            What happens next?
+          </h6>
+          <div class="d-flex gap-3 mb-3">
+            <div class="bg-primary rounded-circle d-flex align-items-center
+                        justify-content-center flex-shrink-0 text-white fw-bold"
+                 style="width:32px;height:32px;font-size:0.85rem;">1</div>
+            <div>
+              <p class="fw-semibold mb-0 small">Request Submitted</p>
+              <p class="text-muted mb-0" style="font-size:0.8rem;">
+                Landlord gets notified of your request
+              </p>
+            </div>
+          </div>
+          <div class="d-flex gap-3 mb-3">
+            <div class="bg-warning rounded-circle d-flex align-items-center
+                        justify-content-center flex-shrink-0 text-white fw-bold"
+                 style="width:32px;height:32px;font-size:0.85rem;">2</div>
+            <div>
+              <p class="fw-semibold mb-0 small">Landlord Reviews</p>
+              <p class="text-muted mb-0" style="font-size:0.8rem;">
+                They approve or reject your request
+              </p>
+            </div>
+          </div>
+          <div class="d-flex gap-3">
+            <div class="bg-success rounded-circle d-flex align-items-center
+                        justify-content-center flex-shrink-0 text-white fw-bold"
+                 style="width:32px;height:32px;font-size:0.85rem;">3</div>
+            <div>
+              <p class="fw-semibold mb-0 small">Booking Confirmed</p>
+              <p class="text-muted mb-0" style="font-size:0.8rem;">
+                You'll see the update in My Bookings
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Double booking notice -->
+        <div class="alert border-0 rounded-3"
+             style="background:linear-gradient(135deg,#fef3c7,#fde68a);">
+          <p class="fw-semibold mb-1">
+            <i class="fa-solid fa-shield-halved text-warning me-2"></i>
+            Double-Booking Protected
+          </p>
+          <p class="small text-muted mb-0">
+            Our system automatically prevents overlapping bookings
+            for the same house.
+          </p>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="mt-3">
+      <a href="{% url 'house_detail' house.pk %}"
+         class="btn btn-outline-secondary">
+        <i class="fa-solid fa-arrow-left me-2"></i>Back to Listing
+      </a>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const pricePerDay = {{ house.price }} / 30;
+
+  function updateCost() {
+    const start = document.querySelector('[name=start_date]').value;
+    const end   = document.querySelector('[name=end_date]').value;
+    const preview = document.getElementById('cost-preview');
+
+    if (start && end) {
+      const days = Math.ceil(
+        (new Date(end) - new Date(start)) / (1000 * 60 * 60 * 24)
+      );
+      if (days > 0) {
+        const total = (days * pricePerDay).toFixed(0);
+        document.getElementById('cost-amount').textContent =
+          'KES ' + parseInt(total).toLocaleString();
+        document.getElementById('cost-days').textContent =
+          days + ' day' + (days > 1 ? 's' : '');
+        preview.classList.remove('d-none');
+      } else {
+        preview.classList.add('d-none');
+      }
+    } else {
+      preview.classList.add('d-none');
+    }
+  }
+
+  document.querySelector('[name=start_date]').addEventListener('change', updateCost);
+  document.querySelector('[name=end_date]').addEventListener('change',   updateCost);
+</script>
+{% endblock %}
